@@ -97,6 +97,91 @@
     root.querySelectorAll?.(ownAvatarSelector).forEach(blur);
   }
 
+  function blurOwnUserNameBlocks(root) {
+    if (!ownHandle) return;
+    const userNameSelector = '[data-testid="UserName"]';
+    const ownMarker = `@${ownHandle}`;
+
+    const tryBlurIfOwn = (element) => {
+      if (!(element instanceof HTMLElement)) return;
+      const text = (element.textContent || "").toLowerCase();
+      if (!text.includes(ownMarker)) return;
+      blur(element);
+      element.querySelectorAll("div[dir=\"ltr\"], span").forEach(blur);
+    };
+
+    if (root.matches?.(userNameSelector)) {
+      tryBlurIfOwn(root);
+    }
+    root.querySelectorAll?.(userNameSelector).forEach(tryBlurIfOwn);
+  }
+
+  function hasOwnHandleLink(container) {
+    if (!ownHandle) return false;
+    if (!(container instanceof Element)) return false;
+
+    const ownPath = `/${ownHandle}`;
+    return Array.from(container.querySelectorAll("a[href]")).some((anchor) => {
+      if (!(anchor instanceof HTMLAnchorElement)) return false;
+      try {
+        const url = new URL(anchor.href, location.origin);
+        return url.pathname === ownPath || url.pathname.startsWith(`${ownPath}/`);
+      } catch (_error) {
+        return false;
+      }
+    });
+  }
+
+  function blurOwnUserNameLegacyBlocks(root) {
+    if (!ownHandle) return;
+    const legacySelector = '[data-testid="User-Name"]';
+    const ownMarker = `@${ownHandle}`;
+
+    const tryBlurIfOwn = (element) => {
+      if (!(element instanceof HTMLElement)) return;
+      const text = (element.textContent || "").toLowerCase();
+      if (!text.includes(ownMarker) && !hasOwnHandleLink(element)) return;
+      blur(element);
+      element.querySelectorAll("div[dir=\"ltr\"], span, a").forEach(blur);
+    };
+
+    if (root.matches?.(legacySelector)) {
+      tryBlurIfOwn(root);
+    }
+    root.querySelectorAll?.(legacySelector).forEach(tryBlurIfOwn);
+  }
+
+  function isOnOwnProfilePage() {
+    if (!ownHandle) return false;
+    const profilePath = `/${ownHandle}`;
+    return (
+      location.pathname === profilePath ||
+      location.pathname.startsWith(`${profilePath}/`)
+    );
+  }
+
+  function isOwnProfileContext() {
+    if (isOnOwnProfilePage()) return true;
+    // Own profile usually has the edit profile button.
+    if (document.querySelector('[data-testid="editProfileButton"]')) return true;
+    return false;
+  }
+
+  function blurOwnProfileBannerImages(root) {
+    if (!isOwnProfileContext()) return;
+    const bannerSelectors = [
+      'img[src*="/profile_banners/"]',
+      '[style*="/profile_banners/"]'
+    ];
+
+    for (const selector of bannerSelectors) {
+      if (root.matches?.(selector)) {
+        blur(root);
+      }
+      root.querySelectorAll?.(selector).forEach(blur);
+    }
+  }
+
   function processNode(node) {
     if (!isEnabled) return;
     if (!(node instanceof Element)) return;
@@ -109,6 +194,9 @@
 
     node.querySelectorAll?.(ACCOUNT_BUTTON_SELECTOR).forEach(blurOwnAccountButton);
     blurOwnTweetAvatars(node);
+    blurOwnUserNameBlocks(node);
+    blurOwnUserNameLegacyBlocks(node);
+    blurOwnProfileBannerImages(node);
   }
 
   function setEnabled(nextEnabled) {

@@ -8,6 +8,9 @@
 
 - 左サイドバー下部の自分のアカウント表示（`SideNav_AccountSwitcher_Button`）
 - 自分の投稿に付くアイコン画像（`UserAvatar-Container-<あなたのID>`）
+- 自分の表示名ブロック（`data-testid="UserName"` かつ `@あなたのID` を含む要素）
+- 自分の表示名ブロック（`data-testid="User-Name"` かつ `@あなたのID` / 自分プロフィールリンクを含む要素）
+- 自分のプロフィールページのヘッダー画像（`/profile_banners/` を含む `img` / `style`）
 
 以下は対象外です。
 
