@@ -1,33 +1,39 @@
-# X Mosaic Mask (Chrome Extension)
+﻿# X Mosaic Mask（Chrome拡張）
 
-A Chrome extension for `x.com` / `twitter.com`.
+`x.com` / `twitter.com` 向けの Chrome 拡張です。
 
-It blurs:
-- Your own account block in the left sidebar (`SideNav_AccountSwitcher_Button`)
-- Your own tweet-side avatar images (`UserAvatar-Container-<your_handle>`)
+## 機能
 
-It does not blur full tweet content or all profile pages.
+以下の要素にのみぼかしを適用します。
 
-## Setup
+- 左サイドバー下部の自分のアカウント表示（`SideNav_AccountSwitcher_Button`）
+- 自分の投稿に付くアイコン画像（`UserAvatar-Container-<あなたのID>`）
 
-1. Open `chrome://extensions/`
-2. Enable Developer mode
-3. Click "Load unpacked"
-4. Select this folder (`X_mosaic`)
+以下は対象外です。
 
-## ON/OFF Toggle
+- 投稿本文全体
+- 他ユーザーのプロフィールページ全体
 
-- Click the extension icon in Chrome toolbar to toggle ON/OFF
-- Badge shows current state (`ON` / `OFF`)
-- ON/OFF is saved in `chrome.storage.local`
-- The page updates automatically without reinstall
+## セットアップ
 
-## Implementation Notes
+1. `chrome://extensions/` を開く
+2. 右上の「デベロッパーモード」を ON
+3. 「パッケージ化されていない拡張機能を読み込む」をクリック
+4. このフォルダ（`X_mosaic`）を選択
 
-- `content.js` watches DOM updates with `MutationObserver`
-- Blur effect uses CSS filter (`.xmosaic-blur`)
-- Current selectors are intentionally narrow to avoid affecting unrelated elements
+## ON/OFF 切り替え
 
-## Limitation
+- Chrome ツールバーの拡張アイコンをクリックすると ON/OFF が切り替わります
+- バッジに現在状態（`ON` / `OFF`）が表示されます
+- 状態は `chrome.storage.local` に保存されます
+- 切り替えは再インストール不要で即時反映されます
 
-- If X changes DOM attributes/test IDs, selectors may need updates
+## 実装メモ
+
+- `content.js` は `MutationObserver` で DOM の追加を監視します
+- ぼかしは CSS フィルタ（`.xmosaic-blur`）で実装しています
+- 不要な誤判定を避けるため、セレクタは意図的に狭くしています
+
+## 注意点
+
+- X 側の DOM 構造や `data-testid` が変わると、セレクタ調整が必要になる場合があります
