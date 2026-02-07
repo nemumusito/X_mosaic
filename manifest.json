@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "X Mosaic Mask",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Blur your own account block and tweet-side avatars on x.com.",
   "permissions": [
     "storage"

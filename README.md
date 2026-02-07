@@ -11,6 +11,7 @@
 - 自分の表示名ブロック（`data-testid="UserName"` かつ `@あなたのID` を含む要素）
 - 自分の表示名ブロック（`data-testid="User-Name"` かつ `@あなたのID` / 自分プロフィールリンクを含む要素）
 - 自分のプロフィールページのヘッダー画像（`/profile_banners/` を含む `img` / `style`）
+- 自分のプロフィールページ上部タイトル（`primaryColumn` 内の `h2[role="heading"][aria-level="2"]`）
 
 以下は対象外です。
 

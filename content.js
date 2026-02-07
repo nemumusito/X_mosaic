@@ -14,6 +14,8 @@
 
   let isEnabled = true;
   let ownHandle = null;
+  let scanScheduled = false;
+  let lastSeenUrl = location.href;
 
   function toHandle(raw) {
     if (typeof raw !== "string") return null;
@@ -182,6 +184,18 @@
     }
   }
 
+  function blurOwnProfileTitle() {
+    if (!isOwnProfileContext()) return;
+    const primaryColumn = document.querySelector('[data-testid="primaryColumn"]');
+    if (!(primaryColumn instanceof HTMLElement)) return;
+
+    const title = primaryColumn.querySelector('h2[role="heading"][aria-level="2"]');
+    if (!(title instanceof HTMLElement)) return;
+
+    blur(title);
+    title.querySelectorAll("span, img").forEach(blur);
+  }
+
   function processNode(node) {
     if (!isEnabled) return;
     if (!(node instanceof Element)) return;
@@ -197,13 +211,56 @@
     blurOwnUserNameBlocks(node);
     blurOwnUserNameLegacyBlocks(node);
     blurOwnProfileBannerImages(node);
+    blurOwnProfileTitle();
+  }
+
+  function runFullScan() {
+    if (!isEnabled) return;
+    processNode(document.documentElement);
+  }
+
+  function scheduleFullScan() {
+    if (scanScheduled) return;
+    scanScheduled = true;
+    setTimeout(() => {
+      scanScheduled = false;
+      runFullScan();
+    }, 120);
+  }
+
+  function onPotentialUiChange() {
+    if (!isEnabled) return;
+    if (location.href !== lastSeenUrl) {
+      lastSeenUrl = location.href;
+    }
+    scheduleFullScan();
+  }
+
+  function installNavigationHooks() {
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function patchedPushState(...args) {
+      const result = originalPushState.apply(this, args);
+      onPotentialUiChange();
+      return result;
+    };
+
+    history.replaceState = function patchedReplaceState(...args) {
+      const result = originalReplaceState.apply(this, args);
+      onPotentialUiChange();
+      return result;
+    };
+
+    window.addEventListener("popstate", onPotentialUiChange, true);
+    window.addEventListener("hashchange", onPotentialUiChange, true);
   }
 
   function setEnabled(nextEnabled) {
     isEnabled = Boolean(nextEnabled);
     clearAllBlur();
     if (isEnabled) {
-      processNode(document.documentElement);
+      runFullScan();
     }
   }
 
@@ -226,14 +283,27 @@
   }
 
   function init() {
+    installNavigationHooks();
     watchStorageChanges();
     loadInitialState();
 
+    document.addEventListener("click", onPotentialUiChange, true);
+    document.addEventListener("pointerup", onPotentialUiChange, true);
+    document.addEventListener("keydown", onPotentialUiChange, true);
+
     const observer = new MutationObserver((mutations) => {
       if (!isEnabled) return;
+
+      if (location.href !== lastSeenUrl) {
+        lastSeenUrl = location.href;
+        scheduleFullScan();
+      }
+
       for (const mutation of mutations) {
-        for (const addedNode of mutation.addedNodes) {
-          processNode(addedNode);
+        if (mutation.type === "childList") {
+          for (const addedNode of mutation.addedNodes) {
+            processNode(addedNode);
+          }
         }
       }
     });
