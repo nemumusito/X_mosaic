@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "X Mosaic Mask",
+  "version": "0.1.0",
+  "description": "Blur your own account block and tweet-side avatars on x.com.",
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "X Mosaic Mask (click to toggle)"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://x.com/*",
+        "*://twitter.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
